@@ -82,7 +82,8 @@ class ApiService {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('user');
-    window.location.href = '/login';
+    window.location.hash = '#/login';
+    window.location.reload();
   }
 
   getGoogleAuthUrl(): string {

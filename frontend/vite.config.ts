@@ -3,9 +3,11 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  base: '/universal-data-router/',
   server: {
     port: 3000,
     host: '0.0.0.0',
+    allowedHosts: true,
     proxy: {
       '/api': {
         target: 'http://backend:8000',
@@ -13,10 +15,14 @@ export default defineConfig({
       },
     },
   },
+  preview: {
+    host: '0.0.0.0',
+    allowedHosts: true,
+  },
   build: {
     outDir: 'dist',
     sourcemap: false,
-    minify: 'terser',
+    minify: 'esbuild',
     rollupOptions: {
       output: {
         manualChunks: {
