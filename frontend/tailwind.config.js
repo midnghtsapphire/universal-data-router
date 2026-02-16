@@ -1,0 +1,103 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        // Warm earthy dark palette — NO blue light
+        earth: {
+          50: '#fdf8f0',
+          100: '#f5ead6',
+          200: '#e8d5b0',
+          300: '#d4b87a',
+          400: '#c49a52',
+          500: '#b07d35',
+          600: '#96652a',
+          700: '#7a4e24',
+          800: '#5e3a1e',
+          900: '#3d2613',
+          950: '#1f1309',
+        },
+        forest: {
+          50: '#f0f7f0',
+          100: '#d4e8d4',
+          200: '#a8d1a8',
+          300: '#6fb36f',
+          400: '#4a9a4a',
+          500: '#2d7d2d',
+          600: '#246524',
+          700: '#1c4e1c',
+          800: '#153815',
+          900: '#0e260e',
+          950: '#071307',
+        },
+        ember: {
+          50: '#fdf2f0',
+          100: '#f5d4cf',
+          200: '#e8a89e',
+          300: '#d4736a',
+          400: '#c4504a',
+          500: '#a83830',
+          600: '#8b2d27',
+          700: '#6e231f',
+          800: '#521a17',
+          900: '#381110',
+          950: '#1f0908',
+        },
+        gold: {
+          50: '#fefbf0',
+          100: '#faf0c8',
+          200: '#f2de8a',
+          300: '#e8c84d',
+          400: '#d4ad2e',
+          500: '#b89420',
+          600: '#96771a',
+          700: '#745b14',
+          800: '#54410f',
+          900: '#382c0a',
+          950: '#1c1605',
+        },
+        charcoal: {
+          50: '#f5f3f0',
+          100: '#e0dbd4',
+          200: '#b8b0a3',
+          300: '#8f8575',
+          400: '#6b6254',
+          500: '#4d4538',
+          600: '#3d372d',
+          700: '#2e2a22',
+          800: '#201d18',
+          900: '#14120f',
+          950: '#0a0908',
+        },
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+      },
+      backdropBlur: {
+        xs: '2px',
+      },
+      animation: {
+        'glow-pulse': 'glow-pulse 3s ease-in-out infinite',
+        'slide-up': 'slide-up 0.3s ease-out',
+        'fade-in': 'fade-in 0.4s ease-out',
+      },
+      keyframes: {
+        'glow-pulse': {
+          '0%, 100%': { opacity: '0.4' },
+          '50%': { opacity: '0.8' },
+        },
+        'slide-up': {
+          '0%': { transform: 'translateY(10px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        'fade-in': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+      },
+    },
+  },
+  plugins: [],
+};

@@ -1,0 +1,56 @@
+# ── Python ────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+coverage.xml
+.coverage
+
+# ── Node.js ───────────────────────────────────────────────────
+node_modules/
+frontend/dist/
+frontend/build/
+.pnpm-store/
+*.tsbuildinfo
+
+# ── Environment ───────────────────────────────────────────────
+.env
+.env.local
+.env.production
+!.env.example
+
+# ── Docker ────────────────────────────────────────────────────
+docker-compose.override.yml
+
+# ── IDE ───────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ── Logs ──────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── SSL ───────────────────────────────────────────────────────
+nginx/ssl/*.pem
+nginx/ssl/*.key
+nginx/ssl/*.crt
+
+# ── Storage ───────────────────────────────────────────────────
+storage/
+*.db
+*.sqlite3

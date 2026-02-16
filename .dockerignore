@@ -1,0 +1,16 @@
+node_modules
+.git
+.github
+__pycache__
+*.pyc
+.env
+.env.local
+.vscode
+.idea
+*.md
+!README.md
+coverage.xml
+htmlcov
+.pytest_cache
+.mypy_cache
+.ruff_cache

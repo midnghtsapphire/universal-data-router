@@ -1,0 +1,160 @@
+version: "3.9"
+
+# ═══════════════════════════════════════════════════════════════
+# Universal Data Router — Docker Compose
+# AI-Powered Multi-Source File Organizer by GlowStarLabs
+# Part of the GlowStarLabs / Audrey Evans ecosystem
+# ═══════════════════════════════════════════════════════════════
+
+services:
+  # ── PostgreSQL Database ─────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: udr-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-universal_data_router}
+      POSTGRES_USER: ${POSTGRES_USER:-udr}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-udr_secret}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-udr}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - udr-network
+
+  # ── Redis Cache & Message Broker ────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: udr-redis
+    restart: unless-stopped
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - udr-network
+
+  # ── FastAPI Backend ─────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: udr-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-udr}:${POSTGRES_PASSWORD:-udr_secret}@postgres:5432/${POSTGRES_DB:-universal_data_router}
+      DATABASE_URL_SYNC: postgresql+psycopg2://${POSTGRES_USER:-udr}:${POSTGRES_PASSWORD:-udr_secret}@postgres:5432/${POSTGRES_DB:-universal_data_router}
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - file_storage:/app/storage
+    networks:
+      - udr-network
+
+  # ── Celery Worker ───────────────────────────────────────────
+  celery-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: udr-celery-worker
+    restart: unless-stopped
+    command: celery -A app.tasks.celery_app worker --loglevel=info --concurrency=4
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-udr}:${POSTGRES_PASSWORD:-udr_secret}@postgres:5432/${POSTGRES_DB:-universal_data_router}
+      DATABASE_URL_SYNC: postgresql+psycopg2://${POSTGRES_USER:-udr}:${POSTGRES_PASSWORD:-udr_secret}@postgres:5432/${POSTGRES_DB:-universal_data_router}
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - file_storage:/app/storage
+    networks:
+      - udr-network
+
+  # ── Celery Beat Scheduler ───────────────────────────────────
+  celery-beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: udr-celery-beat
+    restart: unless-stopped
+    command: celery -A app.tasks.celery_app beat --loglevel=info
+    env_file:
+      - .env
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - udr-network
+
+  # ── React Frontend ──────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: udr-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    networks:
+      - udr-network
+
+  # ── Nginx Reverse Proxy ─────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: udr-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - udr-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  file_storage:
+    driver: local
+
+networks:
+  udr-network:
+    driver: bridge
